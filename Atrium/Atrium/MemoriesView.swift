@@ -346,7 +346,7 @@ struct AddMemoryView: View {
                             .background(CassetteFuturismTheme.mediumGray)
                             .cornerRadius(8)
                         }
-                        .onChange(of: selectedImage) { newItem in
+                        .onChange(of: selectedImage) { newItem, _ in
                             Task {
                                 if let data = try? await newItem?.loadTransferable(type: Data.self) {
                                     imageData = data
@@ -387,7 +387,7 @@ struct AddMemoryView: View {
                             .terminalText()
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .background(CassetteFuturismTheme.darkGray)
-                            .onChange(of: tagsText) { newValue in
+                            .onChange(of: tagsText) { newValue, _ in
                                 tags = newValue.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
                             }
                         if !tags.isEmpty {
