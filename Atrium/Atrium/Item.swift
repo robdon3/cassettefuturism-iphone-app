@@ -31,9 +31,9 @@ final class CassetteMemory {
     var createdAt: Date
     var category: String // "conan", "wargames", "galaga", "yuppie", etc.
     var isFavorite: Bool
-    var imageData: Data? // Optional image
-    var audioData: Data? // Optional audio
-    var tags: [String]   // Tags for filtering/search
+    @Attribute(codable: true) var imageData: Data? // Optional image
+    @Attribute(codable: true) var audioData: Data? // Optional audio
+    @Attribute(codable: true) var tags: [String]   // Tags for filtering/search
     
     init(title: String, content: String, category: String = "general", imageData: Data? = nil, audioData: Data? = nil, tags: [String] = []) {
         self.id = UUID()
