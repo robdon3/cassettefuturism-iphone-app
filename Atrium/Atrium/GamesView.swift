@@ -13,42 +13,90 @@ struct GamesView: View {
     @Query private var games: [RetroGame]
     @State private var showingGame = false
     @State private var selectedGame: RetroGame?
+    @State private var showingArcade = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     var body: some View {
-        VStack {
-            // Header
-            HStack {
-                Text("ARCADE GAMES")
-                    .terminalText()
-                    .font(.title)
-                Spacer()
-                Button("ADD GAME") {
-                    addNewGame()
-                }
-                .buttonStyle(CassetteButtonStyle())
-            }
-            .padding()
-            
-            // Games grid
-            ScrollView {
-                LazyVGrid(columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ], spacing: 20) {
-                    ForEach(games) { game in
-                        GameCard(game: game) {
-                            selectedGame = game
-                            showingGame = true
+        Group {
+            if horizontalSizeClass == .regular {
+                // iPad/large screen layout (unchanged)
+                VStack {
+                    HStack {
+                        Text("ARCADE GAMES")
+                            .terminalText()
+                            .font(.title)
+                        Spacer()
+                        Button("ADD GAME") {
+                            addNewGame()
                         }
+                        .buttonStyle(CassetteButtonStyle())
+                    }
+                    .padding()
+                    // Play Arcade CRT button
+                    PlayArcadeCard(showingArcade: $showingArcade)
+                        .padding(.horizontal)
+                        .padding(.bottom, 8)
+                    ScrollView {
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: 20) {
+                            ForEach(games) { game in
+                                GameCard(game: game) {
+                                    selectedGame = game
+                                    showingGame = true
+                                }
+                            }
+                        }
+                        .padding()
                     }
                 }
-                .padding()
-            }
-        }
-        .background(CassetteFuturismTheme.backgroundGradient)
-        .sheet(isPresented: $showingGame) {
-            if let game = selectedGame {
-                GamePlayView(game: game)
+                .background(CassetteFuturismTheme.backgroundGradient)
+                .sheet(isPresented: $showingGame) {
+                    if let game = selectedGame {
+                        GamePlayView(game: game)
+                    }
+                }
+                .fullScreenCover(isPresented: $showingArcade) {
+                    CRTArcadeGameView(showingArcade: $showingArcade)
+                }
+            } else {
+                // iPhone/compact layout
+                NavigationStack {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            PlayArcadeCard(showingArcade: $showingArcade)
+                                .padding(.horizontal)
+                                .padding(.top)
+                            ForEach(games) { game in
+                                GameCard(game: game) {
+                                    selectedGame = game
+                                    showingGame = true
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                        .padding(.top)
+                    }
+                    .background(CassetteFuturismTheme.backgroundGradient.ignoresSafeArea())
+                    .navigationTitle("Arcade Games")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button(action: addNewGame) {
+                                Label("Add Game", systemImage: "plus")
+                            }
+                            .buttonStyle(CassetteButtonStyle())
+                        }
+                    }
+                    .sheet(isPresented: $showingGame) {
+                        if let game = selectedGame {
+                            GamePlayView(game: game)
+                        }
+                    }
+                    .fullScreenCover(isPresented: $showingArcade) {
+                        CRTArcadeGameView(showingArcade: $showingArcade)
+                    }
+                }
             }
         }
     }
@@ -323,6 +371,92 @@ struct Enemy: Identifiable {
 struct Bullet: Identifiable {
     let id = UUID()
     var position: CGPoint
+}
+
+struct PlayArcadeCard: View {
+    @Binding var showingArcade: Bool
+    var body: some View {
+        Button(action: { showingArcade = true }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(CassetteFuturismTheme.neonBlue, lineWidth: 3)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(CassetteFuturismTheme.darkGray)
+                            .shadow(color: CassetteFuturismTheme.neonBlue.opacity(0.2), radius: 8, x: 0, y: 4)
+                    )
+                VStack(spacing: 8) {
+                    Image(systemName: "gamecontroller.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(CassetteFuturismTheme.neonBlue)
+                    Text("PLAY ARCADE")
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(CassetteFuturismTheme.neonBlue)
+                        .shadow(color: CassetteFuturismTheme.neonBlue.opacity(0.5), radius: 2, x: 0, y: 1)
+                }
+            }
+            .frame(height: 100)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct CRTArcadeGameView: View {
+    @Binding var showingArcade: Bool
+    var body: some View {
+        ZStack {
+            // CRT background
+            CassetteFuturismTheme.terminalGradient
+                .ignoresSafeArea()
+            // CRT overlay
+            CRTOverlay()
+            // Placeholder for game area
+            VStack {
+                HStack {
+                    Spacer()
+                    Button(action: { showingArcade = false }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.white)
+                            .shadow(radius: 4)
+                    }
+                    .padding()
+                }
+                Spacer()
+                Text("CRT Arcade Game Coming Soon!")
+                    .font(.title)
+                    .foregroundColor(CassetteFuturismTheme.neonBlue)
+                    .shadow(color: CassetteFuturismTheme.neonBlue.opacity(0.7), radius: 8)
+                Spacer()
+            }
+        }
+    }
+}
+
+struct CRTOverlay: View {
+    var body: some View {
+        ZStack {
+            // Scanlines
+            VStack(spacing: 2) {
+                ForEach(0..<120, id: \.self) { _ in
+                    Rectangle()
+                        .fill(Color.black.opacity(0.07))
+                        .frame(height: 1)
+                }
+            }
+            // Vignette
+            LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.35), .clear, Color.black.opacity(0.35)]), startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            LinearGradient(gradient: Gradient(colors: [Color.black.opacity(0.5), .clear, Color.black.opacity(0.5)]), startPoint: .leading, endPoint: .trailing)
+                .ignoresSafeArea()
+            // Subtle screen curve
+            RoundedRectangle(cornerRadius: 60)
+                .stroke(Color.white.opacity(0.08), lineWidth: 8)
+                .padding(12)
+        }
+        .allowsHitTesting(false)
+    }
 }
 
 #Preview {

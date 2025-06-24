@@ -31,14 +31,20 @@ final class CassetteMemory {
     var createdAt: Date
     var category: String // "conan", "wargames", "galaga", "yuppie", etc.
     var isFavorite: Bool
+    var imageData: Data? // Optional image
+    var audioData: Data? // Optional audio
+    var tags: [String]   // Tags for filtering/search
     
-    init(title: String, content: String, category: String = "general") {
+    init(title: String, content: String, category: String = "general", imageData: Data? = nil, audioData: Data? = nil, tags: [String] = []) {
         self.id = UUID()
         self.title = title
         self.content = content
         self.createdAt = Date()
         self.category = category
         self.isFavorite = false
+        self.imageData = imageData
+        self.audioData = audioData
+        self.tags = tags
     }
 }
 

@@ -9,45 +9,80 @@ import SwiftUI
 
 struct CultureView: View {
     @State private var selectedSection = 0
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     var body: some View {
-        VStack {
-            // Header
-            Text("1980s CULTURE")
-                .terminalText()
-                .font(.title)
-                .padding()
-            
-            // Section tabs
-            Picker("Section", selection: $selectedSection) {
-                Text("YUPPIES").tag(0)
-                Text("ART").tag(1)
-                Text("TECH").tag(2)
-                Text("LIFESTYLE").tag(3)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
-            
-            // Content
-            ScrollView {
-                Group {
-                    switch selectedSection {
-                    case 0:
-                        YuppieSection()
-                    case 1:
-                        ArtSection()
-                    case 2:
-                        TechSection()
-                    case 3:
-                        LifestyleSection()
-                    default:
-                        YuppieSection()
+        Group {
+            if horizontalSizeClass == .regular {
+                // iPad/large screen layout (unchanged)
+                VStack {
+                    Text("1980s CULTURE")
+                        .terminalText()
+                        .font(.title)
+                        .padding()
+                    Picker("Section", selection: $selectedSection) {
+                        Text("YUPPIES").tag(0)
+                        Text("ART").tag(1)
+                        Text("TECH").tag(2)
+                        Text("LIFESTYLE").tag(3)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    ScrollView {
+                        Group {
+                            switch selectedSection {
+                            case 0:
+                                YuppieSection()
+                            case 1:
+                                ArtSection()
+                            case 2:
+                                TechSection()
+                            case 3:
+                                LifestyleSection()
+                            default:
+                                YuppieSection()
+                            }
+                        }
+                        .padding()
                     }
                 }
-                .padding()
+                .background(CassetteFuturismTheme.backgroundGradient)
+            } else {
+                // iPhone/compact layout
+                NavigationStack {
+                    VStack(spacing: 0) {
+                        Picker("Section", selection: $selectedSection) {
+                            Text("YUPPIES").tag(0)
+                            Text("ART").tag(1)
+                            Text("TECH").tag(2)
+                            Text("LIFESTYLE").tag(3)
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        ScrollView {
+                            Group {
+                                switch selectedSection {
+                                case 0:
+                                    YuppieSection()
+                                case 1:
+                                    ArtSection()
+                                case 2:
+                                    TechSection()
+                                case 3:
+                                    LifestyleSection()
+                                default:
+                                    YuppieSection()
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                    .background(CassetteFuturismTheme.backgroundGradient.ignoresSafeArea())
+                    .navigationTitle("Culture")
+                }
             }
         }
-        .background(CassetteFuturismTheme.backgroundGradient)
     }
 }
 
