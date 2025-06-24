@@ -12,13 +12,13 @@ import SwiftData
 final class Item {
     var timestamp: Date
     var title: String
-    var description: String
+    var details: String
     var category: String
     
-    init(timestamp: Date, title: String = "", description: String = "", category: String = "general") {
+    init(timestamp: Date, title: String = "", details: String = "", category: String = "general") {
         self.timestamp = timestamp
         self.title = title
-        self.description = description
+        self.details = details
         self.category = category
     }
 }
